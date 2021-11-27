@@ -11,13 +11,14 @@ namespace ResolutionSwitcher.Gui
 
             _borderPen = new Pen(Color.Green, 4);
             _recBorderPen = new Pen(Color.Blue, 4);
-            _textFont = new Font("Tahoma", 16);
+            _textFont = new Font(SystemFonts.DefaultFont.FontFamily, 16);
             _textBrush = new SolidBrush(Color.White);
             _textFormat = new StringFormat
             {
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center
             };
+
         }
 
         private SettingsForm _settingsForm = null;
@@ -32,6 +33,7 @@ namespace ResolutionSwitcher.Gui
             var model = AppModel.Instance;
             model.Changed += Model_Changed;
             model.Load();
+            RebuildMenu();
 
             // Hide on start up
             BeginInvoke(new MethodInvoker(delegate
@@ -87,6 +89,11 @@ namespace ResolutionSwitcher.Gui
 
         private void Model_Changed(object sender, EventArgs e)
         {
+            RebuildMenu();
+        }
+
+        private void RebuildMenu()
+        {
             var toRemove = trayMenu.Items.OfType<ToolStripItem>()
                 .Where(x => x.Tag is DisplayMode)
                 .ToArray();
@@ -94,7 +101,7 @@ namespace ResolutionSwitcher.Gui
             {
                 trayMenu.Items.Remove(removeItem);
             }
-            
+
             int index = 0;
             var model = AppModel.Instance;
             model.Save();
@@ -146,7 +153,7 @@ namespace ResolutionSwitcher.Gui
 
         private Rectangle GetModeBounds(DisplayModeType type, int index)
         {
-            const int cellHeight = 80;
+            const int cellHeight = 96;
             const int margin = 8;
             int row, col;
             if (type == DisplayModeType.Recommended)
@@ -169,7 +176,8 @@ namespace ResolutionSwitcher.Gui
         {
             const int cornerRadius = 8;
             Rectangle rc = GetModeBounds(type, index);
-            string text = string.Format("{0}. {1}", index + 1, mode);
+            string key = (type == DisplayModeType.Recommended) ? "0" : (index + 1).ToString();
+            string text = string.Format("{0}. {1}", key, mode);
             var pen = type == DisplayModeType.Recommended ? _recBorderPen : _borderPen;
             g.DrawRoundedRectangle(pen, rc, cornerRadius);
             g.DrawString(text, _textFont, _textBrush, rc, _textFormat);

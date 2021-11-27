@@ -259,9 +259,18 @@ void DisplayApi::SetCurrentMode(DisplayMode^ mode) {
     memset(&devMode, 0, sizeof(DEVMODE));
     devMode.dmSize = sizeof(DEVMODE);
     devMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYORIENTATION;
-    devMode.dmPelsWidth = mode->Resolution.Width;
-    devMode.dmPelsHeight = mode->Resolution.Height;
     devMode.dmDisplayOrientation = (DWORD)mode->Orientation;
+    // Vertical screen should swap width/height
+    if (mode->Orientation == DisplayOrientation::Default ||
+        mode->Orientation == DisplayOrientation::Rotate180)
+    {
+        devMode.dmPelsWidth = mode->Resolution.Width;
+        devMode.dmPelsHeight = mode->Resolution.Height;
+    }
+    else {
+        devMode.dmPelsWidth = mode->Resolution.Height;
+        devMode.dmPelsHeight = mode->Resolution.Width;
+    }
     ChangeDisplaySettings(&devMode, 0);
     RecommendedDPIScaling::set(mode->Scale);
 }
