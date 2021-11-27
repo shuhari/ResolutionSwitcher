@@ -18,6 +18,7 @@ namespace ResolutionSwitcher.Gui
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center
             };
+
         }
 
         private SettingsForm _settingsForm = null;
@@ -32,6 +33,7 @@ namespace ResolutionSwitcher.Gui
             var model = AppModel.Instance;
             model.Changed += Model_Changed;
             model.Load();
+            RebuildMenu();
 
             // Hide on start up
             BeginInvoke(new MethodInvoker(delegate

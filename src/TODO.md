@@ -1,6 +1,7 @@
 ## TODO
 
 - Hover effect for modes
+- Hotkey support
 
 ## DONE
 
