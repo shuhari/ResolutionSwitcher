@@ -79,11 +79,13 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(818, 465);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "Resolution Switcher";
             this.Activated += new System.EventHandler(this.MainForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Click += new System.EventHandler(this.MainForm_Click);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.MainForm_Paint);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyPress);
             this.trayMenu.ResumeLayout(false);

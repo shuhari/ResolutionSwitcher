@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.lsvModes = new System.Windows.Forms.ListView();
             this.colResolution = new System.Windows.Forms.ColumnHeader();
             this.colOrientation = new System.Windows.Forms.ColumnHeader();
@@ -253,6 +254,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lsvModes);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "SettingsForm";
             this.Text = "Settings";

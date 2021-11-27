@@ -5,7 +5,12 @@ VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResolutionSwitcher.Core", "ResolutionSwitcher.Core\ResolutionSwitcher.Core.vcxproj", "{99DDBD7D-BF96-452D-ADA0-C5D9577FE9F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResolutionSwitcher.Gui", "ResolutionSwitcher.Gui\ResolutionSwitcher.Gui.csproj", "{4D547948-E417-4FB2-924B-0FA7C6714A74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResolutionSwitcher.Gui", "ResolutionSwitcher.Gui\ResolutionSwitcher.Gui.csproj", "{4D547948-E417-4FB2-924B-0FA7C6714A74}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{6270673E-5196-4D94-BB27-1F178ABFC955}"
+	ProjectSection(SolutionItems) = preProject
+		TODO.md = TODO.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
