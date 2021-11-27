@@ -71,6 +71,11 @@ namespace ResolutionSwitcher.Gui
 
         private void Model_Changed(object sender, EventArgs e)
         {
+            RebuildMenu();
+        }
+
+        private void RebuildMenu()
+        {
             var toRemove = trayMenu.Items.OfType<ToolStripItem>()
                 .Where(x => x.Tag is DisplayMode)
                 .ToArray();
@@ -78,7 +83,7 @@ namespace ResolutionSwitcher.Gui
             {
                 trayMenu.Items.Remove(removeItem);
             }
-            
+
             int index = 0;
             var model = AppModel.Instance;
             model.Save();

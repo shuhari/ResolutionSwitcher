@@ -34,6 +34,7 @@
             FillCombo(cboResolution, model.Resolutions);
             FillCombo(cboOrientation, model.Orientations);
             FillCombo(cboScale, model.Scales);
+            FillModes();
         }
 
         private void FillCombo(ComboBox cbo, SelectOption[] options)
