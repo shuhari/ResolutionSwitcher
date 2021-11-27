@@ -2,6 +2,13 @@
 
 namespace ResolutionSwitcher.Gui
 {
+    public enum DisplayModeType
+    {
+        Custom = 1,
+
+        Recommended = 2,
+    }
+
     public class SelectOption
     {
         public SelectOption(string name, int value)

@@ -7,9 +7,25 @@ namespace ResolutionSwitcher.Gui
         public MainForm()
         {
             InitializeComponent();
+            this.ResizeRedraw = true;
+
+            _borderPen = new Pen(Color.Green, 4);
+            _recBorderPen = new Pen(Color.Blue, 4);
+            _textFont = new Font("Tahoma", 16);
+            _textBrush = new SolidBrush(Color.White);
+            _textFormat = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
         }
 
         private SettingsForm _settingsForm = null;
+        private Pen _borderPen;
+        private Pen _recBorderPen;
+        private Brush _textBrush;
+        private StringFormat _textFormat;
+        private Font _textFont;
 
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -118,6 +134,45 @@ namespace ResolutionSwitcher.Gui
         {
             var g = e.Graphics;
             g.FillRectangle(Brushes.Black, ClientRectangle);
+
+            var recMode = AppModel.Instance.RecommendedMode;
+            var modes = AppModel.Instance.Modes.ToArray();
+            DrawMode(g, DisplayModeType.Recommended, 0, recMode);
+            for (int i=0; i<modes.Length; i++)
+            {
+                DrawMode(g, DisplayModeType.Custom, i, modes[i]);
+            }
+        }
+
+        private Rectangle GetModeBounds(DisplayModeType type, int index)
+        {
+            const int cellHeight = 80;
+            const int margin = 8;
+            int row, col;
+            if (type == DisplayModeType.Recommended)
+            {
+                row = 0;
+                col = 1;
+            }
+            else
+            {
+                row = index / 3 + 1;
+                col = index % 3;
+            }
+            int cellWidth = ClientRectangle.Width / 3;
+            var rc = new Rectangle(cellWidth * col, cellHeight * row, cellWidth, cellHeight);
+            rc.Inflate(-margin, -margin);
+            return rc;
+        }
+
+        private void DrawMode(Graphics g, DisplayModeType type, int index, DisplayMode mode)
+        {
+            const int cornerRadius = 8;
+            Rectangle rc = GetModeBounds(type, index);
+            string text = string.Format("{0}. {1}", index + 1, mode);
+            var pen = type == DisplayModeType.Recommended ? _recBorderPen : _borderPen;
+            g.DrawRoundedRectangle(pen, rc, cornerRadius);
+            g.DrawString(text, _textFont, _textBrush, rc, _textFormat);
         }
 
         private void MainForm_KeyPress(object sender, KeyPressEventArgs e)
@@ -133,6 +188,32 @@ namespace ResolutionSwitcher.Gui
                     DisplayApi.SetCurrentMode(mode);
                 }
             }
+        }
+
+        private void MainForm_Click(object sender, EventArgs e)
+        {
+            var pt = PointToClient(Cursor.Position);
+            var mode = GetTargetMode(pt);
+            if (mode != null)
+            {
+                DisplayApi.SetCurrentMode(mode);
+            }
+        }
+
+        private DisplayMode GetTargetMode(Point pt)
+        {
+            var model = AppModel.Instance;
+            var rc = GetModeBounds(DisplayModeType.Recommended, 0);
+            if (rc.Contains(pt))
+                return model.RecommendedMode;
+            var modes = model.Modes.ToArray();
+            for (int i=0; i<modes.Length; i++)
+            {
+                rc = GetModeBounds(DisplayModeType.Custom, i);
+                if (rc.Contains(pt))
+                    return modes[i];
+            }
+            return null;
         }
     }
 }
