@@ -5,9 +5,12 @@ namespace ResolutionSwitcher {
 
     using namespace System;
     using namespace System::Drawing;
+    using namespace System::ComponentModel;
 
-    // DEVICE_SCALE_FACTOR (shtypes.h)
-	public enum class DeviceScaleFactor {
+    /* 
+      DEVICE_SCALE_FACTOR (shtypes.h)
+    */
+	public enum class ScaleFactor {
         Invalid = 0,
         Scale100 = 100,
         Scale120 = 120,
@@ -34,6 +37,12 @@ namespace ResolutionSwitcher {
         Rotate270 = 3,
     };
 
+    public enum class DisplayModeType
+    {
+        Custom = 1,
+        Recommended = 2,
+    };
+
     public ref class Names {
     public:
         inline static String^ OfResolution(Size resolution) {
@@ -50,7 +59,7 @@ namespace ResolutionSwitcher {
             }
         }
 
-        inline static String^ OfScale(DeviceScaleFactor scale) {
+        inline static String^ OfScale(ScaleFactor scale) {
             if ((int)scale > 0) {
                 return String::Format("{0}%", (int)scale);
             }
@@ -58,17 +67,40 @@ namespace ResolutionSwitcher {
         }
     };
 
+    /**
+    * Display resolution + orientation + scale
+    */
     public ref class DisplayMode {
     public:
-        inline DisplayMode(Size resolution, DisplayOrientation orientation, DeviceScaleFactor scale) {
+        inline DisplayMode(DisplayModeType type, int index,
+            Size resolution, DisplayOrientation orientation, ScaleFactor scale) {
+            _type = type;
+            _index = index;
             _resolution = resolution;
             _orientation = orientation;
             _scale = scale;
         }
 
-        property Size Resolution { inline Size get() { return _resolution; } }
-        property DisplayOrientation Orientation { inline DisplayOrientation get() { return _orientation; }}
-        property DeviceScaleFactor Scale { inline DeviceScaleFactor get() { return _scale; }}
+        property DisplayModeType Type { 
+            inline DisplayModeType get() { return _type; } 
+        }
+
+        property int Index { 
+            inline int get() { return _index; } 
+            inline void set(int value) { _index = value; }
+        }
+
+        property Size Resolution { 
+            inline Size get() { return _resolution; } 
+        }
+
+        property DisplayOrientation Orientation { 
+            inline DisplayOrientation get() { return _orientation; }
+        }
+
+        property ScaleFactor Scale {
+            inline ScaleFactor get() { return _scale; }
+        }
 
         inline String^ ToString() override {
             return String::Format("{0}, {1}, {2}", 
@@ -92,21 +124,34 @@ namespace ResolutionSwitcher {
     private:
         Size _resolution;
         DisplayOrientation _orientation;
-        DeviceScaleFactor _scale;
+        ScaleFactor _scale;
+        DisplayModeType _type;
+        int _index;
     };
 
+    /**
+    * Manage to get/set display settings
+    */
     public ref class DisplayApi {
     public:
-        static property DeviceScaleFactor RecommendedDPIScaling{
-            DeviceScaleFactor get();
-            void set(DeviceScaleFactor value);
-        }
+        // Enum all supported screen resolutions
         static array<Size>^ GetResolutions();
-        static Size GetRecommendedResolution();
-
+        // Get recommended(default) resolution + scale
         static DisplayMode^ GetRecommendedMode();
-        static DisplayMode^ GetCurrentMode();
-        static void SetCurrentMode(DisplayMode^ mode);
+        // Get current resotion + orientation + scale
+        static property DisplayMode^ CurrentMode {
+            DisplayMode^ get();
+            void set(DisplayMode^ mode);
+        }
+
+    private:
+        static Size GetRecommendedResolution();
+        static ScaleFactor GetCurrentScaling();
+        // Get/Set recommended DPI scaling
+        static property ScaleFactor RecommendedScaling {
+            ScaleFactor get();
+            void set(ScaleFactor value);
+        }
     };
 
 }; // namespace ResolutionSwitcher

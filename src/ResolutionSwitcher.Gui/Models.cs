@@ -2,13 +2,6 @@
 
 namespace ResolutionSwitcher.Gui
 {
-    public enum DisplayModeType
-    {
-        Custom = 1,
-
-        Recommended = 2,
-    }
-
     public class SelectOption
     {
         public SelectOption(string name, int value)
@@ -55,26 +48,26 @@ namespace ResolutionSwitcher.Gui
             Orientations = orientationValues.Select(x => new SelectOption(Names.OfOrientation(x), (int)x)).ToArray();
             var scaleValues = new[]
             {
-                DeviceScaleFactor.Scale100,
-                DeviceScaleFactor.Scale120,
-                DeviceScaleFactor.Scale125,
-                DeviceScaleFactor.Scale140,
-                DeviceScaleFactor.Scale150,
-                DeviceScaleFactor.Scale160,
-                DeviceScaleFactor.Scale175,
-                DeviceScaleFactor.Scale180,
-                DeviceScaleFactor.Scale200,
-                DeviceScaleFactor.Scale225,
-                DeviceScaleFactor.Scale250,
-                DeviceScaleFactor.Scale300,
-                DeviceScaleFactor.Scale350,
-                DeviceScaleFactor.Scale400,
-                DeviceScaleFactor.Scale450,
-                DeviceScaleFactor.Scale500,
+                ScaleFactor.Scale100,
+                ScaleFactor.Scale120,
+                ScaleFactor.Scale125,
+                ScaleFactor.Scale140,
+                ScaleFactor.Scale150,
+                ScaleFactor.Scale160,
+                ScaleFactor.Scale175,
+                ScaleFactor.Scale180,
+                ScaleFactor.Scale200,
+                ScaleFactor.Scale225,
+                ScaleFactor.Scale250,
+                ScaleFactor.Scale300,
+                ScaleFactor.Scale350,
+                ScaleFactor.Scale400,
+                ScaleFactor.Scale450,
+                ScaleFactor.Scale500,
             };
             Scales = scaleValues.Select(x => new SelectOption(Names.OfScale(x), (int)x)).ToArray();
             RecommendedMode = DisplayApi.GetRecommendedMode();
-            CurrentMode = DisplayApi.GetCurrentMode();
+            CurrentMode = DisplayApi.CurrentMode;
             _modes = new List<DisplayMode>();
         }
 
@@ -88,7 +81,7 @@ namespace ResolutionSwitcher.Gui
 
         public DisplayMode CurrentMode { get; private set; }
 
-        private List<DisplayMode> _modes;
+        private readonly List<DisplayMode> _modes;
 
         public IEnumerable<DisplayMode> Modes => _modes.AsReadOnly();
 
@@ -121,7 +114,7 @@ namespace ResolutionSwitcher.Gui
         public void Update()
         {
             RecommendedMode = DisplayApi.GetRecommendedMode();
-            CurrentMode = DisplayApi.GetCurrentMode();
+            CurrentMode = DisplayApi.CurrentMode;
         }
 
         public bool Add(DisplayMode mode)
@@ -129,6 +122,7 @@ namespace ResolutionSwitcher.Gui
             if (_modes.Contains(mode))
                 return false;
             _modes.Add(mode);
+            UpdateIndexes();
             InvokeChanged();
             return true;
         }
@@ -137,10 +131,19 @@ namespace ResolutionSwitcher.Gui
         {
             if (_modes.Remove(mode))
             {
+                UpdateIndexes();
                 InvokeChanged();
                 return true;
             }
             return false;
+        }
+
+        private void UpdateIndexes()
+        {
+            for (int i=0; i<_modes.Count; i++)
+            {
+                _modes[i].Index = i;
+            }
         }
 
         public void Clear()
@@ -159,6 +162,7 @@ namespace ResolutionSwitcher.Gui
                 var target = _modes[index - 1];
                 _modes[index - 1] = _modes[index];
                 _modes[index] = target;
+                UpdateIndexes();
                 InvokeChanged();
                 return true;
             }
@@ -172,6 +176,7 @@ namespace ResolutionSwitcher.Gui
                 var target = _modes[index + 1];
                 _modes[index + 1] = _modes[index];
                 _modes[index] = target;
+                UpdateIndexes();
                 InvokeChanged();
                 return true;
             }
@@ -199,6 +204,7 @@ namespace ResolutionSwitcher.Gui
                     else
                         break;
                 }
+                UpdateIndexes();
             }
         }
 
@@ -213,7 +219,7 @@ namespace ResolutionSwitcher.Gui
             int height = int.Parse(m.Groups[2].Value);
             int orientation = int.Parse(m.Groups[3].Value);
             int scale = int.Parse(m.Groups[4].Value);
-            mode = new DisplayMode(new Size(width, height), (DisplayOrientation)orientation, (DeviceScaleFactor)scale);
+            mode = new DisplayMode(DisplayModeType.Custom, 0, new Size(width, height), (DisplayOrientation)orientation, (ScaleFactor)scale);
             return true;
         }
 

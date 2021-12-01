@@ -19,11 +19,6 @@
         private void SettingsForm_Activated(object sender, EventArgs e)
         {
             CenterToScreen();
-            var mainForm = Application.OpenForms.OfType<Form>().FirstOrDefault(x => x is MainForm);
-            if (mainForm != null)
-            {
-                mainForm.Hide();
-            }
 
             var model = AppModel.Instance;
             model.Update();
@@ -34,10 +29,10 @@
             FillCombo(cboResolution, model.Resolutions);
             FillCombo(cboOrientation, model.Orientations);
             FillCombo(cboScale, model.Scales);
-            FillModes();
+            OnModelChanged(model);
         }
 
-        private void FillCombo(ComboBox cbo, SelectOption[] options)
+        private static void FillCombo(ComboBox cbo, SelectOption[] options)
         {
             cbo.Items.Clear();
             foreach (var option in options) 
@@ -46,20 +41,6 @@
             }
             if (cbo.Items.Count > 0)
                 cbo.SelectedIndex = 0;
-        }
-
-        private void FillModes()
-        {
-            var model = AppModel.Instance;
-
-            lsvModes.Items.Clear();
-            foreach (var mode in model.Modes)
-            {
-                var item = lsvModes.Items.Add(Names.OfResolution(mode.Resolution));
-                item.SubItems.Add(Names.OfOrientation(mode.Orientation));
-                item.SubItems.Add(Names.OfScale(mode.Scale));
-                item.Tag = mode;
-            }
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -71,13 +52,13 @@
             int width = sizeValue >> 16;
             int height = sizeValue & 0xFFFF;
             var orientation = (DisplayOrientation)GetSelectedValue(cboOrientation);
-            var scale = (DeviceScaleFactor)GetSelectedValue(cboScale);
-            var mode = new DisplayMode(new Size(width, height), orientation, scale);
+            var scale = (ScaleFactor)GetSelectedValue(cboScale);
+            var mode = new DisplayMode(DisplayModeType.Custom, 0, new Size(width, height), orientation, scale);
             
             var model = AppModel.Instance;
             if (model.Add(mode))
             {
-                FillModes();
+                OnModelChanged(model);
             }
         }
 
@@ -95,7 +76,7 @@
                 var model = AppModel.Instance;
                 if (model.Remove(mode))
                 {
-                    FillModes();
+                    OnModelChanged(model);
                 }
             }
         }
@@ -112,7 +93,7 @@
                 {
                     var model = AppModel.Instance;
                     model.Clear();
-                    FillModes();
+                    OnModelChanged(model);
                 }
             }
         }
@@ -125,7 +106,7 @@
                 int index = lsvModes.SelectedIndices[0];
                 if (model.MoveUp(index))
                 {
-                    FillModes();
+                    OnModelChanged(model);
                 }
             }
         }
@@ -138,8 +119,21 @@
                 int index = lsvModes.SelectedIndices[0];
                 if (model.MoveDown(index))
                 {
-                    FillModes();
+                    OnModelChanged(model);
                 }
+            }
+        }
+
+        private void OnModelChanged(AppModel model)
+        {
+            model.Save();
+            lsvModes.Items.Clear();
+            foreach (var mode in model.Modes)
+            {
+                var item = lsvModes.Items.Add(Names.OfResolution(mode.Resolution));
+                item.SubItems.Add(Names.OfOrientation(mode.Orientation));
+                item.SubItems.Add(Names.OfScale(mode.Scale));
+                item.Tag = mode;
             }
         }
     }

@@ -7,23 +7,23 @@
 
 
 using namespace System::Collections::Generic;
+using namespace System::Linq;
 using namespace ResolutionSwitcher;
 
-
-static const DeviceScaleFactor DpiVals[] =
+static const ScaleFactor DpiVals[] =
 {
-    DeviceScaleFactor::Scale100,
-    DeviceScaleFactor::Scale125,
-    DeviceScaleFactor::Scale150,
-    DeviceScaleFactor::Scale175,
-    DeviceScaleFactor::Scale200,
-    DeviceScaleFactor::Scale225,
-    DeviceScaleFactor::Scale250,
-    DeviceScaleFactor::Scale300,
-    DeviceScaleFactor::Scale350,
-    DeviceScaleFactor::Scale400,
-    DeviceScaleFactor::Scale450,
-    DeviceScaleFactor::Scale500,
+    ScaleFactor::Scale100,
+    ScaleFactor::Scale125,
+    ScaleFactor::Scale150,
+    ScaleFactor::Scale175,
+    ScaleFactor::Scale200,
+    ScaleFactor::Scale225,
+    ScaleFactor::Scale250,
+    ScaleFactor::Scale300,
+    ScaleFactor::Scale350,
+    ScaleFactor::Scale400,
+    ScaleFactor::Scale450,
+    ScaleFactor::Scale500,
 };
 
 // Idea from:
@@ -32,8 +32,8 @@ static const DeviceScaleFactor DpiVals[] =
 const GUID GUID_CLASS_MONITOR = { 0x4d36e96e, 0xe325, 0x11ce, 0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18 };
 
 
-int GetDPIScalingIndex(DeviceScaleFactor value) {
-    for (int i = 0; i < sizeof(DpiVals) / sizeof(DeviceScaleFactor); i++) {
+int GetDPIScalingIndex(ScaleFactor value) {
+    for (int i = 0; i < sizeof(DpiVals) / sizeof(ScaleFactor); i++) {
         if (DpiVals[i] == value)
             return i;
     }
@@ -47,19 +47,19 @@ Size GetSizeForDevID(const CString& TargetDevID);
 Size GetMonitorSizeFromEDID(const HKEY hEDIDRegKey);
 
 
-DeviceScaleFactor DisplayApi::RecommendedDPIScaling::get() {
+ScaleFactor DisplayApi::RecommendedScaling::get() {
     int dpi = 0;
     auto retval = SystemParametersInfo(SPI_GETLOGICALDPIOVERRIDE, 0, (LPVOID)&dpi, 1);
-    if (retval != 0 && abs(dpi) < sizeof(DpiVals) / sizeof(DeviceScaleFactor))
+    if (retval != 0 && abs(dpi) < sizeof(DpiVals) / sizeof(ScaleFactor))
         return DpiVals[dpi * -1];
-	return DeviceScaleFactor::Invalid;
+	return ScaleFactor::Invalid;
 }
 
 
-void DisplayApi::RecommendedDPIScaling::set(DeviceScaleFactor value) {
-    auto recommendedDpiScale = RecommendedDPIScaling::get();
-    if (recommendedDpiScale != DeviceScaleFactor::Invalid) {
-        int recIndex = GetDPIScalingIndex(recommendedDpiScale);
+void DisplayApi::RecommendedScaling::set(ScaleFactor value) {
+    auto recScale = RecommendedScaling::get();
+    if (recScale != ScaleFactor::Invalid) {
+        int recIndex = GetDPIScalingIndex(recScale);
         int setIndex = GetDPIScalingIndex(value);
         if (recIndex >= 0 && setIndex >= 0) {
             int relativeIndex = setIndex - recIndex;
@@ -70,20 +70,18 @@ void DisplayApi::RecommendedDPIScaling::set(DeviceScaleFactor value) {
 
 
 array<Size>^ DisplayApi::GetResolutions() {
-    auto list = gcnew List<Size>();
-    
+    auto set = gcnew HashSet<Size>();
+
     DEVMODE devMode;
     memset(&devMode, 0, sizeof(DEVMODE));
     int modeNum = 0;
     while (EnumDisplaySettings(NULL, modeNum, &devMode)) {
-        auto size = gcnew Size(devMode.dmPelsWidth, devMode.dmPelsHeight);
-        if (!list->Contains(*size)) {
-            list->Add(*size);
-        }
+        Size size(devMode.dmPelsWidth, devMode.dmPelsHeight);
+        set->Add(size);
         modeNum++;
     }
 
-    return list->ToArray();
+    return Enumerable::ToArray(set);
 }
 
 
@@ -174,7 +172,7 @@ Size GetSizeForDevID(const CString& TargetDevID)
     if (NULL == devInfo)
         throw gcnew Exception("SetupDiGetClassDevsEx failed");
 
-    bool bRes = false;
+    bool found = false;
     Size result;
 
     for (ULONG i = 0; ERROR_NO_MORE_ITEMS != GetLastError(); ++i)
@@ -199,12 +197,12 @@ Size GetSizeForDevID(const CString& TargetDevID)
                 continue;
 
             result = GetMonitorSizeFromEDID(hEDIDRegKey);
-            bRes = TRUE;
+            found = TRUE;
             RegCloseKey(hEDIDRegKey);
         }
     }
     SetupDiDestroyDeviceInfoList(devInfo);
-    if (!bRes)
+    if (!found)
         throw gcnew Exception("Display device not found");
     return result;
 }
@@ -217,44 +215,45 @@ Size GetMonitorSizeFromEDID(const HKEY hEDIDRegKey)
 
     if (ERROR_SUCCESS != RegQueryValueEx(hEDIDRegKey, _T("EDID"), NULL, NULL, EDIDdata, &edidsize))
         throw gcnew Exception("EDID data not found");
-    // WidthMm = ((EDIDdata[68] & 0xF0) << 4) + EDIDdata[66];
-    // HeightMm = ((EDIDdata[68] & 0x0F) << 8) + EDIDdata[67];
 
     const int dtd = 54; // # start byte of detailed timing desc.
-
-    int horizontalRes = ((EDIDdata[dtd + 4] >> 4) << 8) | EDIDdata[dtd + 2];
-    int verticalRes = ((EDIDdata[dtd + 7] >> 4) << 8) | EDIDdata[dtd + 5];
-    return Size(horizontalRes, verticalRes);
+    int horzRes = ((EDIDdata[dtd + 4] >> 4) << 8) | EDIDdata[dtd + 2];
+    int vertRes = ((EDIDdata[dtd + 7] >> 4) << 8) | EDIDdata[dtd + 5];
+    return Size(horzRes, vertRes);
 }
 
 
 DisplayMode^ DisplayApi::GetRecommendedMode() {
     Size resolution = GetRecommendedResolution();
     DisplayOrientation orientation = DisplayOrientation::Default;
-    DeviceScaleFactor scale = RecommendedDPIScaling::get();
-    return gcnew DisplayMode(resolution, orientation, scale);
+    ScaleFactor scale = RecommendedScaling::get();
+    return gcnew DisplayMode(DisplayModeType::Recommended, 0, resolution, orientation, scale);
 }
 
 
-DisplayMode^ DisplayApi::GetCurrentMode() {
+ScaleFactor DisplayApi::GetCurrentScaling() {
+    HWND hwnd = GetDesktopWindow();
+    HDC hdc = GetDC(hwnd);
+    int dpi = GetDeviceCaps(hdc, LOGPIXELSX);
+    ReleaseDC(hwnd, hdc);
+    ScaleFactor scale = (ScaleFactor)(dpi * 100 / 96);
+    return scale;
+}
+
+
+DisplayMode^ DisplayApi::CurrentMode::get() {
     DEVMODE devMode;
     memset(&devMode, 0, sizeof(devMode));
     devMode.dmSize = sizeof(DEVMODE);
     EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode);
     Size resolution = Size(devMode.dmPelsWidth, devMode.dmPelsHeight);
     DisplayOrientation orientation = (DisplayOrientation)devMode.dmDisplayOrientation;
-
-    HWND hwndDesktop = GetDesktopWindow();
-    // HWND hwndDesktop = GetConsoleWindow();
-    HDC hdc = GetDC(hwndDesktop);
-    int dpi = GetDeviceCaps(hdc, LOGPIXELSX);
-    ReleaseDC(hwndDesktop, hdc);
-    DeviceScaleFactor scale = (DeviceScaleFactor)(dpi * 100 / 96);
-    return gcnew DisplayMode(resolution, orientation, scale);
+    ScaleFactor scale = GetCurrentScaling();
+    return gcnew DisplayMode(DisplayModeType::Custom, 0, resolution, orientation, scale);
 }
 
 
-void DisplayApi::SetCurrentMode(DisplayMode^ mode) {
+void DisplayApi::CurrentMode::set(DisplayMode^ mode) {
     DEVMODE devMode;
     memset(&devMode, 0, sizeof(DEVMODE));
     devMode.dmSize = sizeof(DEVMODE);
@@ -272,5 +271,5 @@ void DisplayApi::SetCurrentMode(DisplayMode^ mode) {
         devMode.dmPelsHeight = mode->Resolution.Width;
     }
     ChangeDisplaySettings(&devMode, 0);
-    RecommendedDPIScaling::set(mode->Scale);
+    RecommendedScaling::set(mode->Scale);
 }
