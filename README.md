@@ -16,3 +16,7 @@ This program hide to system tray on startup. You can right-click tray icon to sh
 After perfered screen mode defined, you can either right-click or double-click tray icon to choose from available screen modes. Changes are applied at once.
 
 The program can be compiled to both 32 & 64 bit. However, I'd only tested builds for 64-bit, because 32-bit machine are rarely used today.
+
+## Screenshots
+
+![Tray Menu](https://raw.githubusercontent.com/shuhari/ResolutionSwitcher/master/screenshots/tray-menu.png)
