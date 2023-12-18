@@ -221,10 +221,13 @@ namespace ResolutionSwitcher.Gui
             int scale = int.Parse(m.Groups[4].Value);
             mode = new DisplayMode(DisplayModeType.Custom, 0, new Size(width, height), (DisplayOrientation)orientation, (ScaleFactor)scale);
             return true;
+
         }
 
         private string GetModeString(DisplayMode mode)
         {
+            var screens = Screen.AllScreens;
+
             return string.Format("{0},{1},{2},{3}",
                 mode.Resolution.Width, mode.Resolution.Height,
                 (int)mode.Orientation, (int)mode.Scale);
