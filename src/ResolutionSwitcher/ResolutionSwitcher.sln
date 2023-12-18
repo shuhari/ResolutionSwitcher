@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResolutionSwitcher.Gui", "ResolutionSwitcher.Gui\ResolutionSwitcher.Gui.csproj", "{95B594A2-A41B-42DF-83C3-8EA90B93ECC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResolutionSwitcher.Core", "ResolutionSwitcher.Core\ResolutionSwitcher.Core.csproj", "{9C9E4870-F0F2-4DAF-83B8-7010B0318BDC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{95B594A2-A41B-42DF-83C3-8EA90B93ECC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95B594A2-A41B-42DF-83C3-8EA90B93ECC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95B594A2-A41B-42DF-83C3-8EA90B93ECC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95B594A2-A41B-42DF-83C3-8EA90B93ECC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C9E4870-F0F2-4DAF-83B8-7010B0318BDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C9E4870-F0F2-4DAF-83B8-7010B0318BDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C9E4870-F0F2-4DAF-83B8-7010B0318BDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C9E4870-F0F2-4DAF-83B8-7010B0318BDC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {97F89703-3322-4F99-8A27-0CA84E794312}
+	EndGlobalSection
+EndGlobal
