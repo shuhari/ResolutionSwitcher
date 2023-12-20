@@ -22,6 +22,11 @@ namespace ResolutionSwitcher.Gui
             return (IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!;
         }
 
+        private MainWindow GetMainWindow()
+        {
+            return (MainWindow)GetLifeTime().MainWindow!;
+        }
+
         public override void OnFrameworkInitializationCompleted()
         {
             var mainWin = new MainWindow();
@@ -62,7 +67,7 @@ namespace ResolutionSwitcher.Gui
         {
             if (IsDoubleClick()) 
             {
-                var mainWin = (MainWindow)GetLifeTime().MainWindow!;
+                var mainWin = GetMainWindow();
                 mainWin.Show();
                 mainWin.Activate();
             }
@@ -70,7 +75,7 @@ namespace ResolutionSwitcher.Gui
 
         private void mnuCustomize_Click(object sender, EventArgs e)
         {
-            var mainWin = (MainWindow)GetLifeTime().MainWindow!;
+            var mainWin = GetMainWindow();
             mainWin.Show();
             mainWin.Activate();
         }
@@ -80,7 +85,8 @@ namespace ResolutionSwitcher.Gui
             var lines = DisplayService.Dump();
             var text = string.Join(Environment.NewLine, lines);
             var dlg = new DumpDialog { Details = text };
-            dlg.ShowDialog(GetLifeTime().MainWindow!);
+
+            dlg.Show();
         }
 
         private void mnuExit_Click(object sender, EventArgs e)

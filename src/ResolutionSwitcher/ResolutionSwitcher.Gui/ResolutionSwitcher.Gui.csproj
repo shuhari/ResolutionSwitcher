@@ -8,6 +8,12 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <BaseOutputPath>..\..\..\bin</BaseOutputPath>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Assets\app.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\app.ico" />
+  </ItemGroup>
 
 
   <ItemGroup>

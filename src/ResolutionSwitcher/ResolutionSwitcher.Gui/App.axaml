@@ -10,7 +10,8 @@
 
 	<TrayIcon.Icons>
 		<TrayIcons>
-			<TrayIcon ToolTipText="Avalonia Tray Icon ToolTip"
+			<TrayIcon Icon="/Assets/app.ico" 
+					  ToolTipText="Avalonia Tray Icon ToolTip"
 					  Clicked="TrayIcon_Clicked">
 				<TrayIcon.Menu>
 					<NativeMenu>
